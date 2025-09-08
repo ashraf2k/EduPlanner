@@ -10,15 +10,80 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 200px;
+            z-index: 9999;
+            background: #4f46e5;
+            color: #fff;
+            border-radius: 8px;
+            padding: 14px 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+            opacity: 0.95;
+            animation: fadeIn 0.5s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px);}
+            to { opacity: 0.95; transform: translateY(0);}
         }
-        .transition-all {
-            transition: all 0.3s ease;
+        .collapsible {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        .collapsible-header {
+            cursor: pointer;
+            padding: 1rem;
+            background: #f3f4f6;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .collapsible-body {
+            padding: 1rem;
+            display: none;
+            background: #fff;
+        }
+        .collapsible.open .collapsible-body {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        .spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
+        }
+        .spinner div {
+            border: 4px solid #6366f1;
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            0% {transform: rotate(0deg);}
+            100% {transform: rotate(360deg);}
+        }
+        .bookmark-btn {
+            background: none;
+            border: none;
+            color: #f59e42;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            margin-left: 8px;
+        }
+        .bookmark-btn.active {
+            color: #eab308;
         }
     </style>
 </head>
@@ -70,7 +135,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition">
                             View Plans
                         </button>
                     </div>
@@ -91,73 +156,144 @@
         </div>
     </main>
 
+    <div id="notificationArea"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             AOS.init();
             feather.replace();
-            
+
             // Form submission handler
             document.getElementById('viewForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 const weekNumber = document.getElementById('viewWeekNumber').value;
                 const className = document.getElementById('viewClassName').value;
-                
+
                 if (!weekNumber || !className) {
-                    alert('Please select both week number and class name');
+                    showNotification('Please select both week number and class name', 'alert-triangle');
                     return;
                 }
-                
-                displayLessonPlans(weekNumber, className);
+
+                showSpinner();
+                setTimeout(() => {
+                    displayLessonPlans(weekNumber, className);
+                }, 600); // simulate loading
             });
-            
+
+            function showNotification(message, icon="check-circle") {
+                const notif = document.createElement('div');
+                notif.className = "notification";
+                notif.innerHTML = `<i data-feather="${icon}"></i> <span>${message}</span>`;
+                document.getElementById('notificationArea').appendChild(notif);
+                feather.replace();
+                setTimeout(() => { notif.remove(); }, 2600);
+            }
+
+            function showSpinner() {
+                document.getElementById('plansList').innerHTML = `<div class="spinner"><div></div></div>`;
+            }
+
             function displayLessonPlans(weekNumber, className) {
                 const lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
-                const filteredPlans = lessonPlans.filter(plan => 
+                const filteredPlans = lessonPlans.filter(plan =>
                     plan.weekNumber === weekNumber && plan.className.toLowerCase() === className.toLowerCase()
                 );
-                
+
                 const plansList = document.getElementById('plansList');
-                
+
                 if (filteredPlans.length === 0) {
                     plansList.innerHTML = `
                         <div class="p-6 text-center text-gray-500">
                             No lesson plans found for Week ${weekNumber} and Class ${className}
                         </div>
                     `;
+                    showNotification('No lesson plans found!', 'info');
                     return;
                 }
-                
+
+                // Get bookmarks from localStorage
+                let bookmarks = JSON.parse(localStorage.getItem('parentBookmarks') || '[]');
+
                 plansList.innerHTML = '';
-                
-                filteredPlans.forEach(plan => {
+                filteredPlans.forEach((plan, i) => {
+                    const isBookmarked = bookmarks.includes(plan.id);
+
                     const planElement = document.createElement('div');
-                    planElement.className = 'p-6';
+                    planElement.className = 'collapsible';
                     planElement.innerHTML = `
-                        <div class="flex items-center justify-between">
+                        <div class="collapsible-header">
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900">${plan.subjectName} - Lesson ${plan.lessonNumber}</h3>
-                                <p class="mt-1 text-sm text-gray-500">Week ${plan.weekNumber} | Class ${plan.className}</p>
+                                <i data-feather="book"></i>
+                                <span class="ml-2">${plan.subjectName} - Lesson ${plan.lessonNumber}</span>
+                                <button class="bookmark-btn${isBookmarked ? " active" : ""}" title="Bookmark this plan" data-id="${plan.id}">
+                                    <i data-feather="${isBookmarked ? "star" : "star"}"></i>
+                                </button>
                             </div>
+                            <i data-feather="chevron-down"></i>
                         </div>
-                        <div class="mt-4">
-                            <h4 class="text-sm font-medium text-gray-700">Materials:</h4>
+                        <div class="collapsible-body">
+                            <p class="text-sm text-gray-500 mb-2">Week ${plan.weekNumber} | Class ${plan.className}</p>
+                            <h4 class="text-sm font-medium text-gray-700 mt-2">Materials:</h4>
                             <p class="mt-1 text-sm text-gray-600">${plan.materials}</p>
-                        </div>
-                        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-700">Textbook Pages:</h4>
-                                <p class="mt-1 text-sm text-gray-600">${plan.textbookPages || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-700">Quiz:</h4>
-                                <p class="mt-1 text-sm text-gray-600">${plan.quiz || 'N/A'}</p>
+                            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700">Textbook Pages:</h4>
+                                    <p class="mt-1 text-sm text-gray-600">${plan.textbookPages || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700">Quiz:</h4>
+                                    <p class="mt-1 text-sm text-gray-600">${plan.quiz || 'N/A'}</p>
+                                </div>
                             </div>
                         </div>
                     `;
                     plansList.appendChild(planElement);
                 });
+
+                feather.replace();
+
+                // Collapsible functionality
+                plansList.querySelectorAll('.collapsible-header').forEach(header => {
+                    header.addEventListener('click', function(e) {
+                        if (e.target.closest('.bookmark-btn')) return; // don't collapse if bookmark clicked
+                        const parent = this.parentElement;
+                        parent.classList.toggle('open');
+                        const icon = this.querySelector('i[data-feather="chevron-down"]');
+                        if (icon) {
+                            icon.style.transform = parent.classList.contains('open') ? "rotate(180deg)" : "rotate(0deg)";
+                        }
+                    });
+                });
+
+                // Bookmark functionality
+                plansList.querySelectorAll('.bookmark-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const planId = Number(this.getAttribute('data-id'));
+                        let bookmarks = JSON.parse(localStorage.getItem('parentBookmarks') || '[]');
+                        if (bookmarks.includes(planId)) {
+                            bookmarks = bookmarks.filter(id => id !== planId);
+                            this.classList.remove('active');
+                            showNotification('Bookmark removed', 'star');
+                        } else {
+                            bookmarks.push(planId);
+                            this.classList.add('active');
+                            showNotification('Bookmarked!', 'star');
+                        }
+                        localStorage.setItem('parentBookmarks', JSON.stringify(bookmarks));
+                    });
+                });
             }
+
+            // Display bookmarked plans on load if any (optional UX improvement)
+            // Uncomment the following if you want to show bookmarks on load.
+            // (function showBookmarksOnLoad(){
+            //     let bookmarks = JSON.parse(localStorage.getItem('parentBookmarks') || '[]');
+            //     if(bookmarks.length) {
+            //         // Show a notification or pre-load bookmarks if desired
+            //     }
+            // })();
         });
     </script>
 </body>
