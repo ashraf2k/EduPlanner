@@ -10,15 +10,70 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 200px;
+            z-index: 9999;
+            background: #4f46e5;
+            color: #fff;
+            border-radius: 8px;
+            padding: 14px 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+            opacity: 0.95;
+            animation: fadeIn 0.5s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px);}
+            to { opacity: 0.95; transform: translateY(0);}
         }
-        .transition-all {
-            transition: all 0.3s ease;
+        .modal-bg {
+            background: rgba(0,0,0,0.4);
+        }
+        .modal {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 2rem 2rem 1.5rem;
+            position: relative;
+            z-index: 10000;
+            animation: fadeIn 0.3s;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #444;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .modal-close:hover {
+            color: #1e293b;
+        }
+        /* Highlight invalid fields */
+        .invalid {
+            border-color: #dc2626;
+            background: #fee2e2;
+        }
+        /* Table sorting styles */
+        .sortable:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .sorted-asc::after {
+            content: " ▲";
+        }
+        .sorted-desc::after {
+            content: " ▼";
         }
     </style>
 </head>
@@ -111,7 +166,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition">
                             Save Lesson Plan
                         </button>
                     </div>
@@ -124,11 +179,11 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Week</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lesson</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="weekNumber">Week</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="lessonDay">Day</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="lessonNumber">Lesson</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="subjectName">Subject</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sortable" data-sort="className">Class</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -141,18 +196,40 @@
         </div>
     </main>
 
+    <div id="notificationArea"></div>
+    <!-- Modal for preview -->
+    <div id="modalBg" class="hidden fixed inset-0 z-40 modal-bg"></div>
+    <div id="previewModal" class="hidden modal z-50"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             AOS.init();
             feather.replace();
-            
+
             // Load saved lesson plans from localStorage
             loadLessonPlans();
-            
+
             // Form submission handler
             document.getElementById('lessonForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
+                // Validate fields
+                let valid = true;
+                ['weekNumber','lessonDay','lessonNumber','subjectName','className','materials'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el.value) {
+                        el.classList.add('invalid');
+                        valid = false;
+                    } else {
+                        el.classList.remove('invalid');
+                    }
+                });
+
+                if (!valid) {
+                    showNotification('Please fill all required fields', 'alert-triangle');
+                    return;
+                }
+
                 const lessonPlan = {
                     weekNumber: document.getElementById('weekNumber').value,
                     lessonDay: document.getElementById('lessonDay').value,
@@ -164,23 +241,48 @@
                     quiz: document.getElementById('quiz').value,
                     id: Date.now() // Unique ID for each lesson plan
                 };
-                
+
                 saveLessonPlan(lessonPlan);
                 this.reset();
+                showNotification('Lesson plan saved!', 'check-circle');
+                scrollToForm();
                 loadLessonPlans();
             });
-            
+
+            function showNotification(message, icon="check-circle") {
+                const notif = document.createElement('div');
+                notif.className = "notification";
+                notif.innerHTML = `<i data-feather="${icon}"></i> <span>${message}</span>`;
+                document.getElementById('notificationArea').appendChild(notif);
+                feather.replace();
+                setTimeout(() => { notif.remove(); }, 2400);
+            }
+
             function saveLessonPlan(lessonPlan) {
                 let lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
                 lessonPlans.push(lessonPlan);
                 localStorage.setItem('lessonPlans', JSON.stringify(lessonPlans));
             }
-            
-            function loadLessonPlans() {
-                const lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
+
+            function loadLessonPlans(sortField=null, sortOrder='asc') {
+                let lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
+                if (sortField) {
+                    lessonPlans.sort((a, b) => {
+                        let A = a[sortField], B = b[sortField];
+                        if (!isNaN(A) && !isNaN(B)) {
+                            A = Number(A); B = Number(B);
+                        } else {
+                            A = (A || '').toString().toLowerCase();
+                            B = (B || '').toString().toLowerCase();
+                        }
+                        if (A < B) return sortOrder === 'asc' ? -1 : 1;
+                        if (A > B) return sortOrder === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+                }
                 const tableBody = document.getElementById('lessonPlansTable');
                 tableBody.innerHTML = '';
-                
+
                 lessonPlans.forEach(plan => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -190,35 +292,60 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${plan.subjectName}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${plan.className}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="viewLessonPlan(${plan.id})" class="text-indigo-600 hover:text-indigo-900 mr-3">View</button>
+                            <button onclick="viewLessonPlan(${plan.id})" class="text-indigo-600 hover:text-indigo-900 mr-3 preview-btn" data-id="${plan.id}">Preview</button>
                             <button onclick="editLessonPlan(${plan.id})" class="text-yellow-600 hover:text-yellow-900 mr-3">Edit</button>
                             <button onclick="deleteLessonPlan(${plan.id})" class="text-red-600 hover:text-red-900">Delete</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
                 });
+
+                // Re-attach preview modal listeners
+                document.querySelectorAll('.preview-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        let id = Number(this.getAttribute('data-id'));
+                        let lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
+                        let plan = lessonPlans.find(p => p.id === id);
+                        showPreviewModal(plan);
+                    };
+                });
             }
-            
+
+            // Sorting functionality
+            let currentSort = { field: null, order: 'asc' };
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', function() {
+                    const sortField = this.getAttribute('data-sort');
+                    let sortOrder = 'asc';
+                    if (currentSort.field === sortField && currentSort.order === 'asc') sortOrder = 'desc';
+                    currentSort = { field: sortField, order: sortOrder };
+
+                    document.querySelectorAll('th.sortable').forEach(th2 => th2.classList.remove('sorted-asc','sorted-desc'));
+                    this.classList.add(sortOrder === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+                    loadLessonPlans(sortField, sortOrder);
+                });
+            });
+
+            // Expose for global scope
             window.viewLessonPlan = function(id) {
-                const lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
-                const plan = lessonPlans.find(p => p.id === id);
-                
-                if (plan) {
-                    alert(`Week ${plan.weekNumber}, Lesson ${plan.lessonNumber}\nSubject: ${plan.subjectName}\nClass: ${plan.className}\nMaterials: ${plan.materials}\nTextbook Pages: ${plan.textbookPages}\nQuiz: ${plan.quiz || 'N/A'}`);
-                }
+                let lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
+                let plan = lessonPlans.find(p => p.id === id);
+                showPreviewModal(plan);
             };
-            
+
             window.deleteLessonPlan = function(id) {
                 let lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
                 lessonPlans = lessonPlans.filter(p => p.id !== id);
                 localStorage.setItem('lessonPlans', JSON.stringify(lessonPlans));
-                loadLessonPlans();
+                showNotification('Lesson plan deleted', 'trash-2');
+                loadLessonPlans(currentSort.field, currentSort.order);
             };
 
             window.editLessonPlan = function(id) {
-                const lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
-                const plan = lessonPlans.find(p => p.id === id);
-                
+                let lessonPlans = JSON.parse(localStorage.getItem('lessonPlans')) || [];
+                let plan = lessonPlans.find(p => p.id === id);
+
                 if (plan) {
                     document.getElementById('weekNumber').value = plan.weekNumber;
                     document.getElementById('lessonDay').value = plan.lessonDay;
@@ -228,15 +355,47 @@
                     document.getElementById('materials').value = plan.materials;
                     document.getElementById('textbookPages').value = plan.textbookPages;
                     document.getElementById('quiz').value = plan.quiz;
-                    
+
                     // Remove the old plan
                     let updatedPlans = lessonPlans.filter(p => p.id !== id);
                     localStorage.setItem('lessonPlans', JSON.stringify(updatedPlans));
-                    
-                    // Scroll to form
+
+                    // Highlight and scroll to form
                     document.getElementById('lessonForm').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('lessonForm').style.boxShadow = '0 0 0 3px #eab308';
+                    setTimeout(()=>{ document.getElementById('lessonForm').style.boxShadow = ''; }, 1500);
                 }
             };
+
+            // Modal logic for preview
+            function showPreviewModal(plan) {
+                if (!plan) return;
+                const modal = document.getElementById('previewModal');
+                modal.innerHTML = `
+                    <button class="modal-close" id="closePreviewBtn" title="Close">&times;</button>
+                    <h3 class="text-lg font-bold text-indigo-800 mb-2">Lesson Plan Preview</h3>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Week:</strong> ${plan.weekNumber}, <strong>Day:</strong> ${plan.lessonDay}</div>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Lesson #:</strong> ${plan.lessonNumber}</div>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Subject:</strong> ${plan.subjectName}</div>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Class:</strong> ${plan.className}</div>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Materials:</strong> ${plan.materials}</div>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Textbook Pages:</strong> ${plan.textbookPages || "N/A"}</div>
+                    <div class="text-sm text-gray-700 mb-1"><strong>Quiz:</strong> ${plan.quiz || "N/A"}</div>
+                `;
+                document.getElementById('modalBg').classList.remove('hidden');
+                modal.classList.remove('hidden');
+                document.getElementById('closePreviewBtn').onclick = closeModal;
+            }
+            function closeModal() {
+                document.getElementById('modalBg').classList.add('hidden');
+                document.getElementById('previewModal').classList.add('hidden');
+            }
+            document.getElementById('modalBg').onclick = closeModal;
+
+            // Smooth scroll to form
+            function scrollToForm() {
+                document.getElementById('lessonForm').scrollIntoView({ behavior: 'smooth' });
+            }
         });
     </script>
 </body>
