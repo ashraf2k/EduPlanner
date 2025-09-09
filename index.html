@@ -1,207 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlan - Lesson Planner</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-hover:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.07);
-        }
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-        /* Pulse animation for CTA */
-        .pulse {
-            animation: pulse 1.2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(99,102,241, 0.5);}
-            70% { box-shadow: 0 0 0 10px rgba(99,102,241, 0);}
-            100% { box-shadow: 0 0 0 0 rgba(99,102,241, 0);}
-        }
-        /* Modal styles */
-        .modal-bg {
-            background: rgba(0,0,0,0.4);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPlan - Lesson Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    .card-hover:hover{transform:translateY(-5px);box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04);}
+    .transition-all {transition: all .3s ease;}
+  </style>
 </head>
 <body class="bg-gray-50">
-    <div id="vanta-bg" class="fixed inset-0 -z-10 opacity-20"></div>
-    
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <i data-feather="book-open" class="text-indigo-600 mr-2"></i>
-                    <span class="text-xl font-bold text-indigo-600">EduPlan</span>
-                </div>
-                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <a href="index.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
-                    <a href="teacher.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Teacher Portal</a>
-                    <a href="parent.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Parent Portal</a>
-                </div>
-                <div class="-mr-2 flex items-center sm:hidden">
-                    <button type="button" aria-controls="mobile-menu" aria-expanded="false" class="mobile-menu-btn inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition">
-                        <i data-feather="menu"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="sm:hidden hidden transition-all" id="mobile-menu">
-            <div class="pt-2 pb-3 space-y-1">
-                <a href="index.html" class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Home</a>
-                <a href="teacher.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Teacher Portal</a>
-                <a href="parent.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Parent Portal</a>
-            </div>
-        </div>
-    </nav>
+<nav class="bg-white shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <i data-feather="book-open" class="text-indigo-600 mr-2"></i>
+        <span class="text-xl font-bold text-indigo-600">EduPlan</span>
+      </div>
+      <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+        <a href="index.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+        <a href="teacher.html" class="border-transparent text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Teacher Portal</a>
+        <a href="parent.html" class="border-transparent text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Parent Portal</a>
+      </div>
+    </div>
+  </div>
+</nav>
 
-    <!-- Modal Popup -->
-    <div id="introModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
-        <div class="modal-bg absolute inset-0"></div>
-        <div class="bg-white rounded-lg shadow-lg px-8 py-6 z-10 max-w-md w-full relative animate-fade-in">
-            <button id="closeModalBtn" class="absolute top-2 right-2 text-gray-400 hover:text-gray-800">
-                <i data-feather="x"></i>
-            </button>
-            <h2 class="text-xl font-bold mb-3 text-indigo-700">Welcome to EduPlan!</h2>
-            <p class="mb-3 text-gray-600">Streamline your lesson planning and keep parents in the loop! 🎉<br>Check out new features and enjoy a smoother experience.</p>
-            <button id="modalCta" class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Get Started</button>
+<main>
+  <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl" data-aos="fade-down">
+        <span class="block">Streamline Your</span>
+        <span class="block text-indigo-600">Lesson Planning</span>
+      </h1>
+      <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl" data-aos="fade-up" data-aos-delay="100">
+        Now backed by <span class="font-semibold">Google Sheets</span> — teachers save once, parents see anywhere.
+      </p>
+      <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8" data-aos="fade-up" data-aos-delay="200">
+        <div class="rounded-md shadow">
+          <a href="teacher.html" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+            Teacher Portal
+          </a>
         </div>
+        <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+          <a href="parent.html" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+            Parent Portal
+          </a>
+        </div>
+      </div>
     </div>
 
-    <main>
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl" data-aos="fade-down">
-                    <span class="block">Streamline Your</span>
-                    <span class="block text-indigo-600">Lesson Planning</span>
-                </h1>
-                <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl" data-aos="fade-up" data-aos-delay="100">
-                    A comprehensive solution for teachers to plan lessons and for parents to stay informed.
-                </p>
-                <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8" data-aos="fade-up" data-aos-delay="200">
-                    <div class="rounded-md shadow">
-                        <a href="teacher.html" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-all pulse" id="ctaTeacherBtn">
-                            Teacher Portal
-                        </a>
-                    </div>
-                    <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                        <a href="parent.html" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition-all" id="ctaParentBtn">
-                            Parent Portal
-                        </a>
-                    </div>
-                </div>
+    <div class="mt-16 grid gap-8 md:grid-cols-3">
+      <div class="bg-white overflow-hidden shadow rounded-lg transition-all card-hover" data-aos="fade-up" data-aos-delay="100">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+              <i data-feather="database" class="text-white"></i>
             </div>
-
-            <div class="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                <div class="bg-white overflow-hidden shadow rounded-lg transition-all card-hover" data-aos="fade-up" data-aos-delay="100">
-                    <div class="px-4 py-5 sm:p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3 transition-all">
-                                <i data-feather="calendar" class="text-white"></i>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <h3 class="text-lg font-medium text-gray-900">Weekly Planning</h3>
-                                <p class="mt-1 text-sm text-gray-500">Organize lessons by week for better curriculum management.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg transition-all card-hover" data-aos="fade-up" data-aos-delay="200">
-                    <div class="px-4 py-5 sm:p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3 transition-all">
-                                <i data-feather="book" class="text-white"></i>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <h3 class="text-lg font-medium text-gray-900">Subject Tracking</h3>
-                                <p class="mt-1 text-sm text-gray-500">Manage multiple subjects with detailed lesson plans.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg transition-all card-hover" data-aos="fade-up" data-aos-delay="300">
-                    <div class="px-4 py-5 sm:p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3 transition-all">
-                                <i data-feather="users" class="text-white"></i>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <h3 class="text-lg font-medium text-gray-900">Parent Access</h3>
-                                <p class="mt-1 text-sm text-gray-500">Parents can view weekly plans for their children.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="ml-5 w-0 flex-1">
+              <h3 class="text-lg font-medium text-gray-900">Central Storage</h3>
+              <p class="mt-1 text-sm text-gray-500">All plans in one Google Sheet (Class 1–12).</p>
             </div>
+          </div>
         </div>
-    </main>
-
-    <footer class="bg-white">
-        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
-            <p class="mt-8 text-center text-base text-gray-400">
-                &copy; 2023 EduPlan. All rights reserved.
-            </p>
+      </div>
+      <div class="bg-white overflow-hidden shadow rounded-lg transition-all card-hover" data-aos="fade-up" data-aos-delay="200">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+              <i data-feather="share-2" class="text-white"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <h3 class="text-lg font-medium text-gray-900">Export & Share</h3>
+              <p class="mt-1 text-sm text-gray-500">PNG/PDF exports and quick WhatsApp sharing.</p>
+            </div>
+          </div>
         </div>
-    </footer>
+      </div>
+      <div class="bg-white overflow-hidden shadow rounded-lg transition-all card-hover" data-aos="fade-up" data-aos-delay="300">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+              <i data-feather="edit" class="text-white"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <h3 class="text-lg font-medium text-gray-900">Edit Anywhere</h3>
+              <p class="mt-1 text-sm text-gray-500">Update plans and they sync for all parents.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
-    <script>
-        VANTA.GLOBE({
-            el: "#vanta-bg",
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x5b6ee1,
-            backgroundColor: 0xf8fafc,
-            size: 0.80
-        });
-    </script>
-    <script>AOS.init();</script>
-    <script>feather.replace();</script>
-    <script>
-        // Mobile menu toggle with animation
-        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        });
+<footer class="bg-white">
+  <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+    <p class="mt-8 text-center text-base text-gray-400">
+      &copy; 2025 EduPlan. All rights reserved.
+    </p>
+  </div>
+</footer>
 
-        // Show intro modal for first-time visitors
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!localStorage.getItem('eduplanModalShown')) {
-                document.getElementById('introModal').classList.remove('hidden');
-            }
-            document.getElementById('closeModalBtn').onclick = closeModal;
-            document.getElementById('modalCta').onclick = closeModal;
-            function closeModal() {
-                document.getElementById('introModal').classList.add('hidden');
-                localStorage.setItem('eduplanModalShown', 'yes');
-            }
-        });
-
-        // Remove pulse animation on button click
-        document.getElementById('ctaTeacherBtn').addEventListener('click', function() {
-            this.classList.remove('pulse');
-        });
-        document.getElementById('ctaParentBtn').addEventListener('click', function() {
-            this.classList.remove('pulse');
-        });
-    </script>
+<script>AOS.init();</script>
+<script>feather.replace();</script>
 </body>
 </html>
